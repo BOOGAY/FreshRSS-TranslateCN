@@ -1,8 +1,8 @@
 <form action="<?php echo _url('extension', 'configure', 'e', urlencode($this->getName())); ?>" method="post">
     <input type="hidden" name="_csrf" value="<?php echo FreshRSS_Auth::csrfToken(); ?>" />
-    <!-- 翻译服务选择 -->
+    
     <div class="form-group">
-        <label class="group-name">选择翻译服务:</label>
+        <label class="group-name">Translation Service:</label>
         <div class="group-controls">
             <div class="form-group">
                 <input type="radio" id="translate-service-deeplx" name="TranslateService" value="deeplx" required <?php echo (FreshRSS_Context::$user_conf->TranslateService == 'deeplx' ? 'checked' : ''); ?>>
@@ -10,7 +10,7 @@
             </div>
             <div class="form-group">
                 <input type="radio" id="translate-service-google" name="TranslateService" value="google" <?php echo (FreshRSS_Context::$user_conf->TranslateService == 'google' ? 'checked' : ''); ?>>
-                <span for="translate-service-google">谷歌翻译</span>
+                <span for="translate-service-google">Google Translate</span>
             </div>
             <div class="form-group">
                 <input type="radio" id="translate-service-libre" name="TranslateService" value="libre" <?php echo (FreshRSS_Context::$user_conf->TranslateService == 'libre' ? 'checked' : ''); ?>>
@@ -18,37 +18,40 @@
             </div>
         </div>
     </div>
-
-    <!-- DeepLX API URL 设置 -->
+    
     <div class="form-group">
-        <label class="group-name" for="deeplx-api-url">DeepLX API地址:</label>
+        <label class="group-name" for="deeplx-api-url">DeepLX API URL:</label>
         <div class="group-controls">
             <input id="deeplx-api-url" name="DeeplxApiUrl" type="text" value="<?php echo FreshRSS_Context::$user_conf->DeeplxApiUrl; ?>">
         </div>
     </div>
-
-    <!-- LibreTranslate 设置 -->
+    
     <div class="form-group">
-        <label class="group-name" for="libre-api-url">LibreTranslate 服务器地址:</label>
+        <label class="group-name" for="libre-api-url">LibreTranslate Server URL:</label>
         <div class="group-controls">
             <input id="libre-api-url" name="LibreApiUrl" type="text" value="<?php echo FreshRSS_Context::$user_conf->LibreApiUrl; ?>">
         </div>
     </div>
     <div class="form-group">
-        <label class="group-name" for="libre-api-key">LibreTranslate API Key (可选):</label>
+        <label class="group-name" for="libre-api-key">LibreTranslate API Key (optional):</label>
         <div class="group-controls">
             <input id="libre-api-key" name="LibreApiKey" type="text" value="<?php echo FreshRSS_Context::$user_conf->LibreApiKey; ?>">
         </div>
     </div>
-
-    <!-- 订阅源翻译设置 -->
     <div class="form-group">
-        <label class="group-name">订阅源翻译设置:</label>
+        <label class="group-name" for="target-language">Target Language Code:</label>
+        <div class="group-controls">
+            <input id="target-language-code" name="TargetLanguageCode" type="text" value="<?php echo FreshRSS_Context::$user_conf->TargetLanguage ?? 'en'; ?>" placeholder="e.g. en, es, fr, de">
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label class="group-name">Feed Translation Settings:</label>
         <div class="group-controls">
             <?php 
             $feeds = FreshRSS_Factory::createFeedDao()->listFeeds();
             if (empty($feeds)): ?>
-                <span>暂无订阅源，请添加后重试</span>
+                <span>No feeds available, please add feeds and try again</span>
             <?php else: ?>
                 <?php foreach ($feeds as $id => $feed): ?>
                 <li class="form-group">
@@ -59,8 +62,7 @@
             <?php endif; ?>
         </div>
     </div>
-
-    <!-- 提交与取消按钮 -->
+    
     <div class="form-group form-actions">
         <div class="group-controls">
             <button type="submit" class="btn btn-important"><?php echo _t('gen.action.submit'); ?></button>
