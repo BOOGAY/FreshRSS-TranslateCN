@@ -1,57 +1,25 @@
 <?php
-require_once('TranslationService.php');
+require_once(__DIR__ . '/TranslationService.php');
 
-class TranslateController {
-    public function translateTitle($title) {
-        if (empty($title)) {
-            error_log("TranslateTitlesCN: Empty title provided");
-            return '';
-        }
-
+class TranslateExtensionController {
+    public function translate($text, $targetLang = 'zh') {
+        if (empty($text)) return '';
         $serviceType = FreshRSS_Context::$user_conf->TranslateService ?? 'google';
-        $translationService = new TranslationService($serviceType);
-        $translatedTitle = '';
-        $attempts = 0;
-        $sleepTime = 1; // 初始等待时间
+        $translationService = new TranslateExtensionService($serviceType);
+        
+        try {
+            // 首选尝试
+            $translatedText = $translationService->translate($text, $targetLang);
+            if (!empty($translatedText)) return $translatedText;
 
-        error_log("TranslateTitlesCN: Service: " . $serviceType . ", Title: " . $title);
-
-        while ($attempts < 2) {
-            try {
-                $translatedTitle = $translationService->translate($title);
-                if (!empty($translatedTitle)) {
-                    error_log("TranslateTitlesCN: Translation successful: " . $translatedTitle);
-                    break;
-                }
-                error_log("TranslateTitlesCN: Empty translation result on attempt " . ($attempts + 1));
-            } catch (Exception $e) {
-                error_log("TranslateTitlesCN: Translation error on attempt " . ($attempts + 1) . " - " . $e->getMessage());
-                $attempts++;
-                sleep($sleepTime);
-                $sleepTime *= 2; // 每次失败后增加等待时间
+            // 失败时仅在非Google模式下尝试一次Google降级，降低并发压力
+            if ($serviceType !== 'google') {
+                $fallbackService = new TranslateExtensionService('google');
+                return $fallbackService->translate($text, $targetLang);
             }
+        } catch (Exception $e) {
+            return $text; // 快速失败返回
         }
-
-        // 如果翻译失败且当前服务为DeeplX，则尝试使用谷歌翻译
-        if (empty($translatedTitle) && $serviceType == 'deeplx') {
-            error_log("TranslateTitlesCN: DeeplX failed, falling back to Google Translate");
-            $translationService = new TranslationService('google');
-            try {
-                $translatedTitle = $translationService->translate($title);
-                if (!empty($translatedTitle)) {
-                    error_log("TranslateTitlesCN: Google Translate fallback successful: " . $translatedTitle);
-                }
-            } catch (Exception $e) {
-                error_log("TranslateTitlesCN: Google Translate fallback failed - " . $e->getMessage());
-            }
-        }
-
-        // 如果翻译仍然失败，使用原始标题
-        if (empty($translatedTitle)) {
-            error_log("TranslateTitlesCN: All translation attempts failed, returning original title");
-            return $title;
-        }
-
-        return $translatedTitle;
+        return $text;
     }
 }
