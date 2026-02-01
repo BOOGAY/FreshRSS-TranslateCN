@@ -1,4 +1,4 @@
-# TranslateTitlesCN
+# TranslateCN
 
 `TranslateCN` 是一个为 [FreshRSS](https://github.com/FreshRSS/FreshRSS) 开发的插件，它能够将指定订阅源中的文章翻译成中文。用户可以选择使用 DeeplX、谷歌翻译或 LibreTranslate 服务来完成翻译。
 
